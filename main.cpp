@@ -42,8 +42,13 @@ struct Player
 	Weapon weapons[3];
 };
 
+// Extra practice: modify this program so Player stores 3 pointers to weapons, and Weapon stores 2 pointers to attachments (to save memory)!
 int main()
 {
+	Attachment attachments[2];
+	attachments[0].name = "Scope";
+	attachments[1].name = "Suppressor";
+	
 	Weapon weapons[3];
 	weapons[0].name = "Rifle";
 	weapons[0].clip_size = 30;
@@ -57,6 +62,14 @@ int main()
 	weapons[2].clip_size = 1;
 	weapons[2].clip_count = 3;
 
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			weapons[i].attachments[j] = attachments[j];
+		}
+	}
+
 	Player* players = new Player[4];
 	players[0].name = "Connor";
 	players[0].can_attack = false;
@@ -65,8 +78,11 @@ int main()
 	players[1].can_attack = true;
 	
 	// Assign the 1st player (player[0])'s weapons to be those we just made!
-	for (int i = 0; i < 3; i++)
-		players[0].weapons[i] = weapons[i];
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 3; j++)
+			players[i].weapons[j] = weapons[j];
+	}
 
 	delete[] players;
 	return 0;
