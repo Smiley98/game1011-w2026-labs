@@ -1,14 +1,12 @@
 #include <string>
 
-struct Player
+struct Attachment
 {
-	void EquipWeapon() { can_attack = true; }
-
 	std::string name;
-	bool can_attack;
-
-	float health;
-	float speed;
+	std::string type;
+	std::string color;
+	std::string manufacturer;
+	int durability;
 };
 
 struct Weapon
@@ -24,29 +22,52 @@ struct Weapon
 
 	int clip_count;
 	int clip_size;
-	int damage;
 	int bullets;
+	int damage;
+	std::string name;
+
+	Attachment attachments[2];
 };
 
-struct Attachment
+struct Player
 {
+	void EquipWeapon() { can_attack = true; }
+
 	std::string name;
-	std::string type;
-	std::string color;
-	std::string manufacturer;
-	int durability;
+	bool can_attack;
+
+	float health;
+	float speed;
+
+	Weapon weapons[3];
 };
 
 int main()
 {
+	Weapon weapons[3];
+	weapons[0].name = "Rifle";
+	weapons[0].clip_size = 30;
+	weapons[0].clip_count = 5;
+
+	weapons[1].name = "Shotgun";
+	weapons[1].clip_size = 10;
+	weapons[1].clip_count = 2;
+
+	weapons[2].name = "Grenade";
+	weapons[2].clip_size = 1;
+	weapons[2].clip_count = 3;
+
 	Player* players = new Player[4];
 	players[0].name = "Connor";
 	players[0].can_attack = false;
 	
 	players[1].name = "Enemy 1";
 	players[1].can_attack = true;
+	
+	// Assign the 1st player (player[0])'s weapons to be those we just made!
+	for (int i = 0; i < 3; i++)
+		players[0].weapons[i] = weapons[i];
+
 	delete[] players;
-
-
 	return 0;
 }
