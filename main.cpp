@@ -27,6 +27,12 @@ bool operator>(Player a, Player b)
 	return a.GetHealth() > b.GetHealth();
 }
 
+std::ostream& operator<<(std::ostream& out, Player player)
+{
+	out << player.name << " has " << player.GetHealth() << " health.";
+	return out;
+}
+
 int main()
 {
 	Player tank, assassin;
@@ -48,8 +54,8 @@ int main()
 	tank.AddHealth(tank_bonus_health);
 	assassin.AddHealth(assassin_bonus_health);
 
-	std::cout << tank.name << " has " << tank.GetHealth() << " health." << std::endl;
-	std::cout << assassin.name << " has " << assassin.GetHealth() << " health." << std::endl;
+	std::cout << tank << std::endl;
+	std::cout << assassin << std::endl;
 
 	return 0;
 }
