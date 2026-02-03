@@ -33,30 +33,37 @@ std::ostream& operator<<(std::ostream& out, Player player)
 	return out;
 }
 
+std::istream& operator>>(std::istream& in, Player& player)
+{
+	int bonus_health;
+	in >> player.name >> bonus_health;
+	player.AddHealth(bonus_health);
+	return in;
+}
+
 int main()
 {
-	Player tank, assassin;
-	tank.name = "Tank";
-	assassin.name = "Assassin";
-
-	int base_health, tank_bonus_health, assassin_bonus_health;
+	Player player1, player2;
+	int base_health;
 
 	std::cout << "Please enter the base health of all players" << std::endl;
 	std::cin >> base_health;
-
-	std::cout << "Please enter the bonus health of " << tank.name << std::endl;
-	std::cin >> tank_bonus_health;
-	
-	std::cout << "Please enter the bonus health of " << assassin.name << std::endl;
-	std::cin >> assassin_bonus_health;
-
 	Player::SetBaseHealth(base_health);
-	tank.AddHealth(tank_bonus_health);
-	assassin.AddHealth(assassin_bonus_health);
 
-	std::cout << tank << std::endl;
-	std::cout << assassin << std::endl;
+	std::cout << "Please enter the name and bonus health of Player 1" << std::endl;
+	std::cin >> player1;
+	
+	std::cout << "Please enter the name and bonus health of Player 2" << std::endl;
+	std::cin >> player2;
+
+	std::cout << "Player 1 " << player1 << std::endl;
+	std::cout << "Player 2 " << player2 << std::endl;
+
+	// Test out our overloaded greater-than-comparison operator!
+	if (player1 > player2)
+		std::cout << player1.name << " has more health than " << player2.name << std::endl;
+	else
+		std::cout << player2.name << " has more health than " << player1.name << std::endl;
 
 	return 0;
 }
-
