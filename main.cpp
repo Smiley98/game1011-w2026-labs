@@ -1,6 +1,19 @@
 #include <iostream>
 #include <string>
 
+class Character
+{
+public:
+	int Test() { return 5; }
+};
+
+// Stream insertion operator overload example
+std::ostream& operator<<(std::ostream& out, Character character)
+{
+	out << character.Test();
+	return out;
+}
+
 int main()
 {
 	int health;
@@ -20,6 +33,10 @@ int main()
 	std::cout << "Please input your character's name." << std::endl;
 	std::cin >> name;
 	std::cout << "Your character is named " << name << std::endl;
+
+	// Example of using Character's overloaded stream insertion operator
+	Character character;
+	std::cout << character << std::endl;
 
 	return 0;
 }
