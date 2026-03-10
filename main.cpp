@@ -1,7 +1,8 @@
 // User-defined header included with quotes ("") instead of angle brackets (<>)
-#include "vec2.h"
-#include "vec3.h"
-#include "vec4.h"
+#include "vec.h"
+//#include "vec2.h"
+//#include "vec3.h"
+//#include "vec4.h"
 #include <iostream>
 
 void TestVec2();
