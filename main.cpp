@@ -42,34 +42,38 @@ Vector2<T> operator/(Vector2<T> v, float s)
 	return r;
 }
 
+using vec2f = Vector2<float>;	// Compiler replaces "vec2f" with "Vector2<float>"
+using vec2d = Vector2<double>;	// Compiler replaces "vec2D" with "Vector2<double>"
+using vec2i = Vector2<int>;		// Compiler replaces "vec2I" with "Vector2<int>"
+
 int main()
 {
 	{
-		Vector2<double> a{ 1.0f, 2.0f };
-		Vector2<double> b{ 3.0f, 4.0f };
-		Vector2<double> c = a + b;
-		Vector2<double> d = a - b;
-		Vector2<double> e = a * 2.0f;
-		Vector2<double> f = a / 2.0f;
+		vec2f a{ 1.0f, 2.0f };
+		vec2f b{ 3.0f, 4.0f };
+		vec2f c = a + b;
+		vec2f d = a - b;
+		vec2f e = a * 2.0f;
+		vec2f f = a / 2.0f;
 	}
 
 	{
-		Vector2<float> a{ 1.0f, 2.0f };
-		Vector2<float> b{ 3.0f, 4.0f };
-		Vector2<float> c = a + b;
-		Vector2<float> d = a - b;
-		Vector2<float> e = a * 2.0f;
-		Vector2<float> f = a / 2.0f;
+		vec2d a{ 1.0f, 2.0f };
+		vec2d b{ 3.0f, 4.0f };
+		vec2d c = a + b;
+		vec2d d = a - b;
+		vec2d e = a * 2.0f;
+		vec2d f = a / 2.0f;
 	}
 	
 	// Note the difference in solutions for integers vs floats!
 	{
-		Vector2<int> a{ 1, 2 };
-		Vector2<int> b{ 3, 4 };
-		Vector2<int> c = a + b;
-		Vector2<int> d = a - b;
-		Vector2<int> e = a * 2;
-		Vector2<int> f = a / 2;
+		vec2i a{ 1, 2 };
+		vec2i b{ 3, 4 };
+		vec2i c = a + b;
+		vec2i d = a - b;
+		vec2i e = a * 2;
+		vec2i f = a / 2;
 	}
 
 	return 0;
