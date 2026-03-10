@@ -1,6 +1,7 @@
 // User-defined header included with quotes ("") instead of angle brackets (<>)
 #include "vec2.h"
 #include "vec3.h"
+#include "vec4.h"
 #include <iostream>
 
 void TestVec2();
@@ -11,7 +12,7 @@ int main()
 {
 	TestVec2();
 	TestVec3();
-	//TestVec4();
+	TestVec4();
 	return 0;
 }
 
@@ -85,5 +86,34 @@ void TestVec3()
 
 void TestVec4()
 {
+	{
+		vec4f a{ 1.0f, 2.0f, 3.0f, 4.0f };
+		vec4f b{ 3.0f, 4.0f, 5.0f, 6.0f };
+		vec4f c = a + b;
+		vec4f d = a - b;
+		vec4f e = a * 2.0f;
+		vec4f f = a / 2.0f;
+		printf("vec3f\n");
+	}
 
+	{
+		vec4d a{ 1.0, 2.0, 3.0, 4.0 };
+		vec4d b{ 3.0, 4.0, 5.0, 6.0 };
+		vec4d c = a + b;
+		vec4d d = a - b;
+		vec4d e = a * 2.0;
+		vec4d f = a / 2.0;
+		printf("vec3d\n");
+	}
+
+	// Note the difference in solutions for integers vs floats!
+	{
+		vec4i a{ 1, 2, 3, 4 };
+		vec4i b{ 3, 4, 5, 6 };
+		vec4i c = a + b;
+		vec4i d = a - b;
+		vec4i e = a * 2;
+		vec4i f = a / 2;
+		printf("vec3i\n");
+	}
 }
