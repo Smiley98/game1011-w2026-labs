@@ -51,9 +51,9 @@ void Example3();
 
 int main()
 {
-	Example1();
+	//Example1();
 	//Example2();
-	//Example3();
+	Example3();
 	return 0;
 }
 
@@ -67,10 +67,9 @@ void Example1()
 
 	while (!file.eof())
 	{
-		std::string word = "Test value";
-		std::getline(file, word);
-		if (!CheckFile(file))
-			std::cout << "Bad";
+		std::string word;
+		//std::getline(file, word); // <-- Throws failbit, perhaps because it reads lines instead of words?
+		std::getline(file, word, ' ');
 		contents.push_back(word);
 	}
 
@@ -93,8 +92,8 @@ void Example2()
 		while (file.get(character))
 		{
 			contents.push_back(character);
+			
 		}
-
 		file.close();
 	}
 	
@@ -122,23 +121,29 @@ void Example3()
 		std::cout << contents[i];
 	}
 
-	//file.close();
-
 	//static constexpr int eofbit = 0x1;
 	//static constexpr int failbit = 0x2;
 
-	std::cout << "Begin" << std::endl;
+	// Note -- must call clear() after reaching the end of a file.
+	// (Must clear the fail-bit for subsequent operations to succeed)! 
 	contents.clear();
+	file.clear();
 	file.seekg(0, std::ios::beg);
 
-	int state_b = file.rdstate();
+	// Can get the length of a file:
+	file.seekg(0, file.end);
+	int length = file.tellg();
+	file.seekg(0, file.beg);
+
+	// Note -- don't call open() on files that are already open!
+	//int state1 = file.rdstate();
+	////file.open("./data/Murphy.txt");
+	//int state2 = file.rdstate();
+
+	contents = ReadFile(file);
+	for (int i = 0; i < contents.size(); i++)
+	{
+		std::cout << contents[i];
+	}
 	file.close();
-	//file.open("./data/Murphy.txt");
-	//contents = ReadFile(file);
-	//for (int i = 0; i < contents.size(); i++)
-	//{
-	//	std::cout << contents[i];
-	//}
-	//file.close();
-	//std::cout << "End" << std::endl;
 }
