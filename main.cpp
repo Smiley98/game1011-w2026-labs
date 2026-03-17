@@ -31,23 +31,37 @@ void Example1()
 	{
 		std::cout << contents[i] << std::endl;
 	}
+
+	file.close();
 }
 
 void Example2()
 {
-	std::ifstream file;
-	file.open("./data/Murphy.txt");
 
 	std::vector<char> contents;
 
-	char character;
-	while (file.get(character))
 	{
-		contents.push_back(character);
-	}
+		std::ifstream file;
+		file.open("./data/Murphy.txt");
 
-	for (int i = 0; i < contents.size(); i++)
+		char character;
+		while (file.get(character))
+		{
+			contents.push_back(character);
+		}
+
+		file.close();
+	}
+	
 	{
-		std::cout << contents[i];
+		std::ofstream file;
+		file.open("./data/Murphy2.txt");
+
+		for (int i = 0; i < contents.size(); i++)
+		{
+			file.put(contents[i]);
+		}
+
+		file.close();
 	}
 }
