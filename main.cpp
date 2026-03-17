@@ -9,18 +9,21 @@ void PrintNumbers(int numbers[], int count)
 	}
 }
 
-int FindLowest(int numbers[], int count)
+template<typename T>
+int FindLowest(T numbers[], int count)
 {
-	int lowest = INT_MAX;
+	int index = 0;
+	T lowest = numbers[index];
 	for (int i = 0; i < count; i++)
 	{
-		int current = numbers[i];
+		T current = numbers[i];
 		if (current < lowest)
 		{
 			lowest = current;
+			index = i;
 		}
 	}
-	return lowest;
+	return index;
 }
 
 int FindHighest(int numbers[], int count)
@@ -58,8 +61,11 @@ void PrintCircle(int radius)
 
 int main()
 {
-	//const int count = 10;
-	//int numbers[count] = { 2, 4, 6, 8, 999, 20, -5, 60, 80, 1 };
+	const int count = 10;
+	float numbers[count] = { 2.0f, 4.0f, 6.0f, 8.0f, 999.0f, 20.0f, -5.0f, 60.0f, 80.0f, 1.0f };
+
+	int low = FindLowest(numbers, count);
+
 	//PrintNumbers(numbers, count);
 	//int lowest = FindLowest(numbers, count);
 	//int highest = FindHighest(numbers, count);
