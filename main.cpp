@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -6,7 +7,6 @@
 
 void Example1();	// Save single object to file
 void Example2();	// Save multiple objects to file (save array to file)
-void Example3();
 
 struct Game
 {
@@ -19,6 +19,7 @@ struct Game
 
 struct Achievement
 {
+	char name[64];
 	int points;
 	bool unlocked;
 };
@@ -68,6 +69,7 @@ void Example2()
 
 		for (int i = 0; i < achievement_count; i++)
 		{
+			sprintf(achievements[i].name, "Achievement %i", i + 1);
 			achievements[i].points = (i + 1) * 10;
 			achievements[i].unlocked = i % 2 == 0;
 		}
@@ -91,9 +93,4 @@ void Example2()
 		file.read((char*)achievements.data(), sizeof(Achievement) * achievements.size());
 		file.close();
 	}
-}
-
-void Example3()
-{
-
 }
