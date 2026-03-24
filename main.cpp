@@ -63,8 +63,10 @@ void Example2()
 
 	{
 		std::vector<Achievement> achievements;
-		achievements.resize(10);
-		for (int i = 0; i < achievements.size(); i++)
+		achievements.resize(15);
+		uint32_t achievement_count = achievements.size();
+
+		for (int i = 0; i < achievement_count; i++)
 		{
 			achievements[i].points = (i + 1) * 10;
 			achievements[i].unlocked = i % 2 == 0;
@@ -72,16 +74,20 @@ void Example2()
 
 		std::ofstream file;
 		file.open(file_name, std::ios::binary);
+		file.write((char*)&achievement_count, sizeof(uint32_t));
 		file.write((char*)achievements.data(), sizeof(Achievement) * achievements.size());
 		file.close();
 	}
 
 	{
+		uint32_t achievement_count = 0;
 		std::vector<Achievement> achievements;
-		achievements.resize(10);
 
 		std::ifstream file;
 		file.open(file_name, std::ios::binary);
+		file.read((char*)&achievement_count, sizeof(uint32_t));
+
+		achievements.resize(achievement_count);
 		file.read((char*)achievements.data(), sizeof(Achievement) * achievements.size());
 		file.close();
 	}
