@@ -2,148 +2,92 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cassert>
 
-bool CheckFile(std::ifstream& file)
-{
-	int state = file.rdstate();
-	bool is_good = state == std::ifstream::goodbit;		// No errors (zero value iostate)
-	bool is_eof = state & std::ifstream::eofbit;		// End-of-File reached on input operation
-	bool is_failed = state & std::ifstream::failbit;	// Logical error on I/O operation
-	bool is_bad = state & std::ifstream::badbit;		// Read or write error on I/O operation
-
-	if (is_good)
-	{
-		std::cout << "File good" << std::endl;
-	}
-	else
-	{
-		if (is_eof)
-		{
-			std::cout << "File eof" << std::endl;
-		}
-		if (is_failed)
-		{
-			std::cout << "File failed" << std::endl;
-		}
-		if (is_bad)
-		{
-			std::cout << "File bad" << std::endl;
-		}
-	}
-
-	return is_good;
-}
-
-std::vector<char> ReadFile(std::ifstream& file)
-{
-	std::vector<char> contents;
-	char character;
-	while (file.get(character))
-	{
-		contents.push_back(character);
-	}
-	return contents;
-}
-
-void Example1();
-void Example2();
+void Example1();	// Save single object to file
+void Example2();	// Save multiple objects to file (save array to file)
 void Example3();
+
+struct Game
+{
+	int lives_count;
+	int achievements_count;
+
+	int health;
+	int mana;
+};
+
+struct Achievement
+{
+	int points;
+	bool unlocked;
+};
 
 int main()
 {
-	//Example1();
-	//Example2();
-	Example3();
+	Example1();
+	Example2();
 	return 0;
 }
 
-// Review of reading file word-by-word vs line-by-line
 void Example1()
 {
-	std::ifstream file;
-	file.open("./data/Murphy.txt");
+	const std::string file_name = "./data/File.bin";
 
-	std::vector<std::string> contents;
-
-	while (!file.eof())
 	{
-		std::string word;
-		//std::getline(file, word); // <-- Throws failbit, perhaps because it reads lines instead of words?
-		std::getline(file, word, ' ');
-		contents.push_back(word);
+		Game game;
+		game.achievements_count = 10;
+		game.lives_count = 3;
+		game.health = 100;
+		game.mana = 50;
+
+		std::ofstream file;
+		file.open(file_name, std::ios::binary);
+		file.write((char*)&game, sizeof(Game));
+		file.close();
 	}
 
-	for (int i = 0; i < contents.size(); i++)
 	{
-		std::cout << contents[i] << std::endl;
-	}
+		Game game;
 
-	file.close();
+		std::ifstream file;
+		file.open(file_name, std::ios::binary);
+		file.read((char*)&game, sizeof(Game));
+		file.close();
+	}
 }
 
 void Example2()
 {
-	std::vector<char> contents;
-	{
-		std::ifstream file;
-		file.open("./data/Murphy.txt");
+	const std::string file_name = "./data/Objects.bin";
 
-		char character;
-		while (file.get(character))
+	{
+		std::vector<Achievement> achievements;
+		achievements.resize(10);
+		for (int i = 0; i < achievements.size(); i++)
 		{
-			contents.push_back(character);
-			
+			achievements[i].points = (i + 1) * 10;
+			achievements[i].unlocked = i % 2 == 0;
 		}
+
+		std::ofstream file;
+		file.open(file_name, std::ios::binary);
+		file.write((char*)achievements.data(), sizeof(Achievement) * achievements.size());
 		file.close();
 	}
-	
+
 	{
-		std::ofstream file;
-		file.open("./data/Murphy2.txt");
+		std::vector<Achievement> achievements;
+		achievements.resize(10);
 
-		for (int i = 0; i < contents.size(); i++)
-		{
-			file.put(contents[i]);
-		}
-
+		std::ifstream file;
+		file.open(file_name, std::ios::binary);
+		file.read((char*)achievements.data(), sizeof(Achievement) * achievements.size());
 		file.close();
 	}
 }
 
 void Example3()
 {
-	std::ifstream file;
-	file.open("./data/Murphy.txt");
 
-	std::vector<char> contents = ReadFile(file);
-	for (int i = 0; i < contents.size(); i++)
-	{
-		std::cout << contents[i];
-	}
-
-	//static constexpr int eofbit = 0x1;
-	//static constexpr int failbit = 0x2;
-
-	// Note -- must call clear() after reaching the end of a file.
-	// (Must clear the fail-bit for subsequent operations to succeed)! 
-	contents.clear();
-	file.clear();
-	file.seekg(0, std::ios::beg);
-
-	// Can get the length of a file:
-	file.seekg(0, file.end);
-	int length = file.tellg();
-	file.seekg(0, file.beg);
-
-	// Note -- don't call open() on files that are already open!
-	//int state1 = file.rdstate();
-	////file.open("./data/Murphy.txt");
-	//int state2 = file.rdstate();
-
-	contents = ReadFile(file);
-	for (int i = 0; i < contents.size(); i++)
-	{
-		std::cout << contents[i];
-	}
-	file.close();
 }
