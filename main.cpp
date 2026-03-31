@@ -72,6 +72,16 @@ void Draw(char c, short x, short y)
 	std::cout << c;
 }
 
+template<typename T>
+T Clamp(T value, T min, T max)
+{
+	if (value < min)
+		value = min;
+	if (value > max)
+		value = max;
+	return value;
+}
+
 struct Entity
 {
 	int x;
@@ -81,7 +91,7 @@ struct Entity
 int main()
 {
 	float player_time_current = 0.0f;
-	float player_time_total = 0.5f;
+	float player_time_total = 0.25f;
 
 	Entity player;
 	player.x = SCREEN_SIZE / 2;
@@ -97,6 +107,7 @@ int main()
 			running = false;
 		
 		// Update the player based on ticks rather than frames (so it doesn't fly off the screen)
+		player_time_current += dt;
 		if (player_time_current >= player_time_total)
 		{
 			player_time_current = 0.0f;
@@ -104,9 +115,23 @@ int main()
 			{
 				player.y--;
 			}
+			if (GetAsyncKeyState(KEY_S))
+			{
+				player.y++;
+			}
+			if (GetAsyncKeyState(KEY_A))
+			{
+				player.x--;
+			}
+			if (GetAsyncKeyState(KEY_D))
+			{
+				player.x++;
+			}
+
+			player.x = Clamp(player.x, 0, SCREEN_SIZE - 1);
+			player.y = Clamp(player.y, 0, SCREEN_SIZE - 1);
 		}
 
-		std::cout << "Time: " << dt << std::endl;
 		for (int row = 0; row < SCREEN_SIZE; row++)
 		{
 			for (int col = 0; col < SCREEN_SIZE; col++)
