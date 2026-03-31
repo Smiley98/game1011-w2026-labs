@@ -87,9 +87,12 @@ int main()
 	player.x = SCREEN_SIZE / 2;
 	player.y = SCREEN_SIZE / 2;
 
+	float dt = 0.0f;
 	bool running = true;
 	while (running)
 	{
+		DWORD frame_start = timeGetTime();
+
 		if (GetAsyncKeyState(VK_ESCAPE))
 			running = false;
 		
@@ -103,22 +106,22 @@ int main()
 			}
 		}
 
-		//for (int row = 0; row < SCREEN_SIZE; row++)
-		//{
-		//	for (int col = 0; col < SCREEN_SIZE; col++)
-		//	{
-		//		std::cout << world[row][col];
-		//	}
-		//	std::cout << std::endl;
-		//}
-		//
-		//// TODO -- Render everything to buffer instead of moving the cursor every draw call to fix flickering
-		//Draw('@', player.x, player.y);
-		//SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
-
-		DWORD milliseconds = timeGetTime();
-		std::cout << "Time: " << milliseconds / 1000 << std::endl;
+		std::cout << "Time: " << dt << std::endl;
+		for (int row = 0; row < SCREEN_SIZE; row++)
+		{
+			for (int col = 0; col < SCREEN_SIZE; col++)
+			{
+				std::cout << world[row][col];
+			}
+			std::cout << std::endl;
+		}
+		
+		// TODO -- Render everything to buffer instead of moving the cursor every draw call to fix flickering
+		Draw('@', player.x, player.y);
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
+
+		DWORD frame_end = timeGetTime();
+		dt = (frame_end - frame_start) / 1000.0f;
 	}
 
 	return 0;
