@@ -46,6 +46,8 @@ enum Key
 
 const int SCREEN_SIZE = 16;
 
+char screen_buffer[SCREEN_SIZE][SCREEN_SIZE];
+
 char world[SCREEN_SIZE][SCREEN_SIZE]
 {
 	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
@@ -99,6 +101,16 @@ int main()
 
 	float dt = 0.0f;
 	bool running = true;
+
+	// Use Win32 API to make cursor invisible so we don't see it jumping all over the place 
+	{
+		HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_CURSOR_INFO cursor;
+		GetConsoleCursorInfo(out, &cursor);
+		cursor.bVisible = FALSE;
+		SetConsoleCursorInfo(out, &cursor);
+	}
+
 	while (running)
 	{
 		DWORD frame_start = timeGetTime();
@@ -136,14 +148,24 @@ int main()
 		{
 			for (int col = 0; col < SCREEN_SIZE; col++)
 			{
-				std::cout << world[row][col];
+				screen_buffer[row][col] = world[row][col];
+			}
+		}
+
+		screen_buffer[player.y][player.x] = '@';
+
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
+		for (int row = 0; row < SCREEN_SIZE; row++)
+		{
+			for (int col = 0; col < SCREEN_SIZE; col++)
+			{
+				std::cout << screen_buffer[row][col];
 			}
 			std::cout << std::endl;
 		}
 		
 		// TODO -- Render everything to buffer instead of moving the cursor every draw call to fix flickering
-		Draw('@', player.x, player.y);
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
+		//Draw('@', player.x, player.y);
 
 		DWORD frame_end = timeGetTime();
 		dt = (frame_end - frame_start) / 1000.0f;

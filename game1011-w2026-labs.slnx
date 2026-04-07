@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="game1011-w2026-labs.vcxproj" />
+  <Project Path="game1011-w2026-labs.vcxproj" Id="7fd3fd19-e218-441f-a4d6-1a9d012a2199" />
 </Solution>
