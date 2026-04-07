@@ -102,6 +102,10 @@ int main()
 	player.x = SCREEN_SIZE / 2;
 	player.y = SCREEN_SIZE / 2;
 
+	Entity enemy;
+	enemy.x = SCREEN_SIZE / 4;
+	enemy.y = SCREEN_SIZE / 2;
+
 	float dt = 0.0f;
 	bool running = true;
 
@@ -167,7 +171,12 @@ int main()
 		// Add entities to world (player, enemies, etc)
 		world[player.y][player.x] = '@';
 
+		world[enemy.y][enemy.x] = '^';
 
+		if (player.x == enemy.x && player.y == enemy.y)
+		{
+			return -1;
+		}
 
 		// Render world
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
