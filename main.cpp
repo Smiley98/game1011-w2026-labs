@@ -45,10 +45,9 @@ enum Key
 };
 
 const int SCREEN_SIZE = 16;
+char world[SCREEN_SIZE][SCREEN_SIZE];
 
-char screen_buffer[SCREEN_SIZE][SCREEN_SIZE];
-
-char world[SCREEN_SIZE][SCREEN_SIZE]
+const char map[SCREEN_SIZE][SCREEN_SIZE]
 {
 	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
 	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
@@ -67,6 +66,10 @@ char world[SCREEN_SIZE][SCREEN_SIZE]
 	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
 	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
 };
+
+// Render pipeline:
+// 1. Update world buffer (map, player and enemy values)
+// 2. Draw world buffer
 
 void Draw(char c, short x, short y)
 {
@@ -122,50 +125,60 @@ int main()
 		player_time_current += dt;
 		if (player_time_current >= player_time_total)
 		{
+			int dy = 0, dx = 0;
 			player_time_current = 0.0f;
 			if (GetAsyncKeyState(KEY_W))
 			{
-				player.y--;
+				dy--;
 			}
 			if (GetAsyncKeyState(KEY_S))
 			{
-				player.y++;
+				dy++;
 			}
 			if (GetAsyncKeyState(KEY_A))
 			{
-				player.x--;
+				dx--;
 			}
 			if (GetAsyncKeyState(KEY_D))
 			{
-				player.x++;
+				dx++;
+			}
+
+			char tile = world[player.y + dy][player.x + dx];
+			if (tile != '#' && tile != '$')
+			{
+				player.x += dx;
+				player.y += dy;
 			}
 
 			player.x = Clamp(player.x, 0, SCREEN_SIZE - 1);
 			player.y = Clamp(player.y, 0, SCREEN_SIZE - 1);
 		}
-
+		
+		// Add map to world
 		for (int row = 0; row < SCREEN_SIZE; row++)
 		{
 			for (int col = 0; col < SCREEN_SIZE; col++)
 			{
-				screen_buffer[row][col] = world[row][col];
+				world[row][col] = map[row][col];
 			}
 		}
 
-		screen_buffer[player.y][player.x] = '@';
+		// Add entities to world (player, enemies, etc)
+		world[player.y][player.x] = '@';
 
+
+
+		// Render world
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
 		for (int row = 0; row < SCREEN_SIZE; row++)
 		{
 			for (int col = 0; col < SCREEN_SIZE; col++)
 			{
-				std::cout << screen_buffer[row][col];
+				std::cout << world[row][col];
 			}
 			std::cout << std::endl;
 		}
-		
-		// TODO -- Render everything to buffer instead of moving the cursor every draw call to fix flickering
-		//Draw('@', player.x, player.y);
 
 		DWORD frame_end = timeGetTime();
 		dt = (frame_end - frame_start) / 1000.0f;
