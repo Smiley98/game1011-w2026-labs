@@ -93,6 +93,17 @@ struct Entity
 	int y;
 };
 
+bool Overlap(const Entity& a, const Entity& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
+
+// This becomes ambiguous the moment Entity contains more than just x & y
+//bool operator==(const Entity& a, const Entity& b)
+//{
+//	return a.x == b.x && a.y == b.y;
+//}
+
 int main()
 {
 	float player_time_current = 0.0f;
@@ -173,7 +184,7 @@ int main()
 
 		world[enemy.y][enemy.x] = '^';
 
-		if (player.x == enemy.x && player.y == enemy.y)
+		if (Overlap(player, enemy))
 		{
 			return -1;
 		}
