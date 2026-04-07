@@ -104,10 +104,25 @@ bool Overlap(const Entity& a, const Entity& b)
 //	return a.x == b.x && a.y == b.y;
 //}
 
+struct EnemyState
+{
+	int x_min, x_max;
+	//int y_min, y_max;
+};
+
+void InitEnemyState(Entity enemy, EnemyState* state, int length)
+{
+	state->x_min = enemy.x - length / 2;
+	state->x_max = enemy.x + length / 2;
+}
+
 int main()
 {
 	float player_time_current = 0.0f;
 	float player_time_total = 0.25f;
+
+	float enemy_time_current = 0.0f;
+	float enemy_time_total = 0.5f;
 
 	Entity player;
 	player.x = SCREEN_SIZE / 2;
@@ -116,6 +131,11 @@ int main()
 	Entity enemy;
 	enemy.x = SCREEN_SIZE / 4;
 	enemy.y = SCREEN_SIZE / 2;
+
+	EnemyState enemy_state;
+	InitEnemyState(enemy, &enemy_state, 6);
+
+	int enemy_direction = 1;
 
 	float dt = 0.0f;
 	bool running = true;
@@ -136,8 +156,9 @@ int main()
 		if (GetAsyncKeyState(VK_ESCAPE))
 			running = false;
 		
-		// Update the player based on ticks rather than frames (so it doesn't fly off the screen)
 		player_time_current += dt;
+		enemy_time_current += dt;
+
 		if (player_time_current >= player_time_total)
 		{
 			int dy = 0, dx = 0;
@@ -168,6 +189,17 @@ int main()
 
 			player.x = Clamp(player.x, 0, SCREEN_SIZE - 1);
 			player.y = Clamp(player.y, 0, SCREEN_SIZE - 1);
+		}
+
+		if (enemy_time_current >= enemy_time_total)
+		{
+			enemy_time_current = 0.0f;
+
+			int x = enemy.x + enemy_direction;
+			if (x > enemy_state.x_max || x < enemy_state.x_min)
+				enemy_direction *= -1;
+
+			enemy.x += enemy_direction;
 		}
 		
 		// Add map to world
