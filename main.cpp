@@ -188,13 +188,15 @@ void Draw(Entity entity, char screen[SCREEN_SIZE][SCREEN_SIZE])
 struct EnemyState
 {
 	int x_min, x_max;
-	//int y_min, y_max;
+	int y_min, y_max;
 };
 
-void InitEnemyState(Entity enemy, EnemyState* state, int length)
+void InitEnemyState(Entity enemy, EnemyState* state, int length_x, int length_y)
 {
-	state->x_min = enemy.x - length / 2;
-	state->x_max = enemy.x + length / 2;
+	state->x_min = enemy.x - length_x / 2;
+	state->x_max = enemy.x + length_x / 2;
+	state->y_min = enemy.y - length_y / 2;
+	state->y_max = enemy.y + length_y / 2;
 }
 
 enum GameState
@@ -204,6 +206,11 @@ enum GameState
 	GAME_LOSS
 };
 
+// Feature ideas (you're not restricted to this, make whatever you like for Lab 5):
+// 1) Improve enemy movement
+// 2) Multiple enemies
+// 3) Different weapons (different bullet behaviour ie shotgun shoots 3 bullets at once)
+// 4) Enemies that can shoot the player
 int main()
 {
 	float player_move_time_current = 0.0f;
@@ -228,14 +235,14 @@ int main()
 	Entity enemy;
 	enemy.x = SCREEN_SIZE / 4;
 	enemy.y = SCREEN_SIZE / 2;
-	enemy.dx = 1;
-	enemy.dy = 0;
+	enemy.dx = 0;
+	enemy.dy = 1;
 	enemy.sprite = '^';
 
 	std::vector<Entity> bullets;
 
 	EnemyState enemy_state;
-	InitEnemyState(enemy, &enemy_state, 6);
+	InitEnemyState(enemy, &enemy_state, 6, 6);
 
 	GameState game_state = GAME_PLAY;
 
@@ -361,8 +368,13 @@ int main()
 			enemy_move_time_current = 0.0f;
 
 			int x = enemy.x + enemy.dx;
+			int y = enemy.y + enemy.dy;
+
 			if (x > enemy_state.x_max || x < enemy_state.x_min)
 				enemy.dx *= -1;
+
+			if (y > enemy_state.y_max || y < enemy_state.y_min)
+				enemy.dy *= -1;
 
 			Move(enemy, world);
 		}
