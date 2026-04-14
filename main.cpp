@@ -367,6 +367,15 @@ int main()
 			Move(enemy, world);
 		}
 
+		for (Entity& bullet : bullets)
+		{
+			if (Overlap(bullet, enemy))
+			{
+				bullet.destroy = true;
+				enemy.destroy = true;
+			}
+		}
+
 		std::erase_if(bullets, [](Entity bullet) { return bullet.destroy; });
 
 		Draw(player, world);
@@ -377,6 +386,10 @@ int main()
 		if (Overlap(player, enemy))
 		{
 			game_state = GAME_LOSS;
+		}
+		else if (enemy.destroy)
+		{
+			game_state = GAME_WIN;
 		}
 
 		// Render world
