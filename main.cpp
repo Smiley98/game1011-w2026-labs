@@ -47,7 +47,7 @@ enum Key
 const int SCREEN_SIZE = 16;
 char world[SCREEN_SIZE][SCREEN_SIZE];
 
-const char map[SCREEN_SIZE][SCREEN_SIZE]
+char map[SCREEN_SIZE][SCREEN_SIZE]
 {
 	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
 	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
@@ -67,6 +67,46 @@ const char map[SCREEN_SIZE][SCREEN_SIZE]
 	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
 };
 
+const char win[SCREEN_SIZE][SCREEN_SIZE]
+{
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ' ', '#' },
+	{ '#', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', '|', ' ', '|', ' ', '|', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', '|', ' ', '|', ' ', '|', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+};
+
+const char loss[SCREEN_SIZE][SCREEN_SIZE]
+{
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', '|', '-', '-', '-', '-', '-', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+};
+
 // Render pipeline:
 // 1. Update world buffer (map, player and enemy values)
 // 2. Draw world buffer
@@ -75,6 +115,19 @@ void Draw(char c, short x, short y)
 {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { x, y });
 	std::cout << c;
+}
+
+void DrawScreen(const char screen[SCREEN_SIZE][SCREEN_SIZE])
+{
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
+	for (int row = 0; row < SCREEN_SIZE; row++)
+	{
+		for (int col = 0; col < SCREEN_SIZE; col++)
+		{
+			std::cout << screen[row][col];
+		}
+		std::cout << std::endl;
+	}
 }
 
 template<typename T>
@@ -116,6 +169,13 @@ void InitEnemyState(Entity enemy, EnemyState* state, int length)
 	state->x_max = enemy.x + length / 2;
 }
 
+enum GameState
+{
+	GAME_PLAY,
+	GAME_WIN,
+	GAME_LOSS
+};
+
 int main()
 {
 	float player_time_current = 0.0f;
@@ -136,6 +196,8 @@ int main()
 	InitEnemyState(enemy, &enemy_state, 6);
 
 	int enemy_direction = 1;
+
+	GameState game_state = GAME_PLAY;
 
 	float dt = 0.0f;
 	bool running = true;
@@ -218,18 +280,23 @@ int main()
 
 		if (Overlap(player, enemy))
 		{
-			return -1;
+			game_state = GAME_LOSS;
 		}
 
 		// Render world
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0, 0 });
-		for (int row = 0; row < SCREEN_SIZE; row++)
+		switch (game_state)
 		{
-			for (int col = 0; col < SCREEN_SIZE; col++)
-			{
-				std::cout << world[row][col];
-			}
-			std::cout << std::endl;
+		case GAME_PLAY:
+			DrawScreen(world);
+			break;
+
+		case GAME_WIN:
+			DrawScreen(win);
+			break;
+
+		case GAME_LOSS:
+			DrawScreen(loss);
+			break;
 		}
 
 		DWORD frame_end = timeGetTime();
