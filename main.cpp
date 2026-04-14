@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <iostream>
+#include <vector>
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -111,7 +112,7 @@ const char loss[SCREEN_SIZE][SCREEN_SIZE]
 // 1. Update world buffer (map, player and enemy values)
 // 2. Draw world buffer
 
-void Draw(char c, short x, short y)
+void DrawChar(char c, short x, short y)
 {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { x, y });
 	std::cout << c;
@@ -140,10 +141,23 @@ T Clamp(T value, T min, T max)
 	return value;
 }
 
+enum Direction
+{
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+};
+
 struct Entity
 {
-	int x;
-	int y;
+	int x = 0;
+	int y = 0;
+	int dx = 0;
+	int dy = 0;
+	Direction facing = UP;
+	char sprite = '!';
+	bool destroy = false;
 };
 
 bool Overlap(const Entity& a, const Entity& b)
@@ -151,11 +165,24 @@ bool Overlap(const Entity& a, const Entity& b)
 	return a.x == b.x && a.y == b.y;
 }
 
-// This becomes ambiguous the moment Entity contains more than just x & y
-//bool operator==(const Entity& a, const Entity& b)
-//{
-//	return a.x == b.x && a.y == b.y;
-//}
+bool CanMove(Entity entity, const char screen[SCREEN_SIZE][SCREEN_SIZE])
+{
+	char tile = screen[entity.y + entity.dy][entity.x + entity.dx];
+	return tile != '#' && tile != '$';
+}
+
+void Move(Entity& entity, char screen[SCREEN_SIZE][SCREEN_SIZE])
+{
+	entity.x += entity.dx;
+	entity.y += entity.dy;
+	entity.x = Clamp(entity.x, 0, SCREEN_SIZE - 1);
+	entity.y = Clamp(entity.y, 0, SCREEN_SIZE - 1);
+}
+
+void Draw(Entity entity, char screen[SCREEN_SIZE][SCREEN_SIZE])
+{
+	screen[entity.y][entity.x] = entity.sprite;
+}
 
 struct EnemyState
 {
@@ -178,24 +205,36 @@ enum GameState
 
 int main()
 {
-	float player_time_current = 0.0f;
-	float player_time_total = 0.25f;
+	float player_move_time_current = 0.0f;
+	float player_move_time_total = 0.25f;
 
-	float enemy_time_current = 0.0f;
-	float enemy_time_total = 0.5f;
+	float player_shoot_time_current = 0.0f;
+	float player_shoot_time_total = 0.75f;
+
+	float enemy_move_time_current = 0.0f;
+	float enemy_move_time_total = 0.5f;
+
+	float bullet_move_time_current = 0.0f;
+	float bullet_move_time_total = 0.1f;
 
 	Entity player;
 	player.x = SCREEN_SIZE / 2;
 	player.y = SCREEN_SIZE / 2;
+	player.dx = 0;
+	player.dy = 0;
+	player.sprite = '@';
 
 	Entity enemy;
 	enemy.x = SCREEN_SIZE / 4;
 	enemy.y = SCREEN_SIZE / 2;
+	enemy.dx = 1;
+	enemy.dy = 0;
+	enemy.sprite = '^';
+
+	std::vector<Entity> bullets;
 
 	EnemyState enemy_state;
 	InitEnemyState(enemy, &enemy_state, 6);
-
-	int enemy_direction = 1;
 
 	GameState game_state = GAME_PLAY;
 
@@ -217,54 +256,8 @@ int main()
 
 		if (GetAsyncKeyState(VK_ESCAPE))
 			running = false;
-		
-		player_time_current += dt;
-		enemy_time_current += dt;
 
-		if (player_time_current >= player_time_total)
-		{
-			int dy = 0, dx = 0;
-			player_time_current = 0.0f;
-			if (GetAsyncKeyState(KEY_W))
-			{
-				dy--;
-			}
-			if (GetAsyncKeyState(KEY_S))
-			{
-				dy++;
-			}
-			if (GetAsyncKeyState(KEY_A))
-			{
-				dx--;
-			}
-			if (GetAsyncKeyState(KEY_D))
-			{
-				dx++;
-			}
-
-			char tile = world[player.y + dy][player.x + dx];
-			if (tile != '#' && tile != '$')
-			{
-				player.x += dx;
-				player.y += dy;
-			}
-
-			player.x = Clamp(player.x, 0, SCREEN_SIZE - 1);
-			player.y = Clamp(player.y, 0, SCREEN_SIZE - 1);
-		}
-
-		if (enemy_time_current >= enemy_time_total)
-		{
-			enemy_time_current = 0.0f;
-
-			int x = enemy.x + enemy_direction;
-			if (x > enemy_state.x_max || x < enemy_state.x_min)
-				enemy_direction *= -1;
-
-			enemy.x += enemy_direction;
-		}
-		
-		// Add map to world
+		// Add map to world (must happen first so entities can do collision correctly)
 		for (int row = 0; row < SCREEN_SIZE; row++)
 		{
 			for (int col = 0; col < SCREEN_SIZE; col++)
@@ -272,11 +265,111 @@ int main()
 				world[row][col] = map[row][col];
 			}
 		}
+		
+		player_move_time_current += dt;
+		player_shoot_time_current += dt;
+		enemy_move_time_current += dt;
+		bullet_move_time_current += dt;
 
-		// Add entities to world (player, enemies, etc)
-		world[player.y][player.x] = '@';
+		if (player_move_time_current >= player_move_time_total)
+		{
+			player_move_time_current = 0.0f;
 
-		world[enemy.y][enemy.x] = '^';
+			player.dy = 0;
+			player.dx = 0;
+			if (GetAsyncKeyState(KEY_W))
+			{
+				player.dy--;
+				player.facing = UP;
+			}
+			else if (GetAsyncKeyState(KEY_S))
+			{
+				player.dy++;
+				player.facing = DOWN;
+			}
+			else if (GetAsyncKeyState(KEY_A))
+			{
+				player.dx--;
+				player.facing = LEFT;
+			}
+			else if (GetAsyncKeyState(KEY_D))
+			{
+				player.dx++;
+				player.facing = RIGHT;
+			}
+
+			if (CanMove(player, world))
+			{
+				Move(player, world);
+			}
+		}
+		
+		if (GetAsyncKeyState(VK_SPACE) && player_shoot_time_current >= player_shoot_time_total)
+		{
+			player_shoot_time_current = 0.0f;
+
+			int dx = 0;
+			int dy = 0;
+			switch (player.facing)
+			{
+			case LEFT:
+				dx = -1;
+				dy = 0;
+				break;
+
+			case RIGHT:
+				dx = 1;
+				dy = 0;
+				break;
+
+			case UP:
+				dx = 0;
+				dy = -1;
+				break;
+
+			case DOWN:
+				dx = 0;
+				dy = 1;
+				break;
+			}
+
+			Entity bullet;
+			bullet.x = player.x + dx;
+			bullet.y = player.y + dy;
+			bullet.dx = dx;
+			bullet.dy = dy;
+			bullet.sprite = 'o';
+
+			bullets.push_back(bullet);
+		}
+
+		if (bullet_move_time_current >= bullet_move_time_total)
+		{
+			bullet_move_time_current = 0.0f;
+			for (Entity& bullet : bullets)
+			{
+				if (CanMove(bullet, world))
+					Move(bullet, world);
+				else
+					bullet.destroy = true;
+			}
+		}
+
+		if (enemy_move_time_current >= enemy_move_time_total)
+		{
+			enemy_move_time_current = 0.0f;
+
+			int x = enemy.x + enemy.dx;
+			if (x > enemy_state.x_max || x < enemy_state.x_min)
+				enemy.dx *= -1;
+
+			Move(enemy, world);
+		}
+
+		Draw(player, world);
+		Draw(enemy, world);
+		for (Entity& bullet : bullets)
+			Draw(bullet, world);
 
 		if (Overlap(player, enemy))
 		{
