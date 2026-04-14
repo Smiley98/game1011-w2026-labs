@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -365,6 +366,8 @@ int main()
 
 			Move(enemy, world);
 		}
+
+		std::erase_if(bullets, [](Entity bullet) { return bullet.destroy; });
 
 		Draw(player, world);
 		Draw(enemy, world);
